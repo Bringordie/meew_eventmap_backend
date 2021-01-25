@@ -1,7 +1,7 @@
 
 # Meew Backend
 
-Link to [Frontend](https://github.com/Bringordie/meew_assignment_frontend)
+Link to [Frontend](https://github.com/Bringordie/meew_eventmap_frontend)
 
 ****Demo:****
 
@@ -73,3 +73,53 @@ You now write where you specify XXXX as the port you've chosen to go with.
 ```
 ngrok HTTP XXXX
 ```
+
+****Code files:****
+
+Folder: /bin  
+  www.ts  
+    - This is here the server is started.  
+
+Folder: /config  
+  setupDB.ts  
+    - Setup for the database. Used for production and testing.  
+    
+Folder: /errors  
+  apiError.ts  
+    - Can be used for returning an request error back to the frontend/user.  
+
+Folder: /facades  
+  eventFacadeWithDB.ts  
+    - Facade for event DB related code.  
+  userFacadeWithDB.ts  
+    - Facade for user DB related code.  
+
+Folder: /interfaces  
+  Event.ts  
+    - Interface for events  
+  Point.ts  
+    - Interface for a geo point  
+  User.ts  
+    - Interface for an user  
+
+Folder: /middelware  
+  basic-auth.ts  
+    - base64 login. This is middleware that is used infront of priviligede requests.  
+
+Folder: /routes  
+  coordinatesToAddress.ts  
+    - Route for taking a latitude and longtitude and changing it into an address.  
+  eventApiDB.ts  
+    - Route for creating an event and viewing all events in the future that is behind middleware login.  
+  userApiDB.ts  
+    - Route for creating a user account.  
+
+Folder: /utils  
+  bcrypt-async-helper.ts  
+    - Used for helping with using bcrypt in async for testing.  
+
+Folder: /test  
+  eventDBTest.ts  
+    - Tests file made for database event requests.  
+  userFacadeDBTest.ts  
+    - Tests file made for database user requests.  
