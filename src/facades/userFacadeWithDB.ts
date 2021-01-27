@@ -6,7 +6,10 @@ import { bryptAsync, bryptCheckAsync } from "../utils/bcrypt-async-helper";
 import * as mongo from "mongodb";
 import { ApiError } from "../errors/apiError";
 import setupDB from "../config/setupDB";
+import IJoinEvent from "../interfaces/JoinEvent";
+import IEvent from "../interfaces/Event";
 let userCollection: mongo.Collection;
+let eventCollection: mongo.Collection;
 
 export default class UserFacade {
   static dbIsReady = false;
@@ -22,7 +25,9 @@ export default class UserFacade {
   static async initDB(db: mongo.Db) {
     //Setup the Facade
     userCollection = db.collection("users");
+    eventCollection = db.collection("events");
     UserFacade.dbIsReady = true;
+    
   }
 
   static async addUser(user: IUser): Promise<string> {
@@ -39,6 +44,29 @@ export default class UserFacade {
     return user;
   }
 
+  // static async joinEvents(joinEvent: IJoinEvent, eventID: any) {
+  //   const event = eventCollection.findOne({
+  //     _id: eventID
+  //   })
+  //   const updateEvent = eventCollection.findOneAndUpdate({
+  //     event, 
+  //     ticketAmount: ticketAmount-joinEvent.ticketAmount;
+  //   })
+  // };
+
+  static async joinEvents(joinEvent: IJoinEvent, eventID: any) : Promise<any> {
+    const event: IEvent | null = await eventCollection.findOne({
+      _id: eventID
+    });
+    const updateEvent = eventCollection.findOneAndUpdate({ _id: eventID }, 
+      { $set: { ticketAmount: event?.ticketAmount?? - joinEvent.ticketAmount }}, 
+      { upsert: true }, 
+      function(err) {
+      if (err) { throw err; }
+      else { console.log("Updated"); }
+    }); 
+  };
+  
   static async checkUser(userName: string, password: string): Promise<boolean> {
     UserFacade.isDbReady();
     let userPassword = "";
