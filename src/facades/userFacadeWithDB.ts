@@ -27,15 +27,26 @@ export default class UserFacade {
 
   static async addUser(user: IUser): Promise<string> {
     UserFacade.isDbReady();
-    const hash = await bryptAsync(user.password);
-    let newUser = { ...user, password: hash };
-    const result = await userCollection.insertOne(newUser);
-    return "User was added";
+    try {
+      //Checking no username exists with provided username
+      const userCheck = await UserFacade.getUser(user.userName);
+      if (userCheck != null) {
+        throw new Error();
+      }
+
+      //Adding user to database
+      const hash = await bryptAsync(user.password);
+      let newUser = { ...user, password: hash };
+      const result = await userCollection.insertOne(newUser);
+      return "User was added";
+    } catch (e) {
+      throw new Error(`Username already exists`);
+    }
   }
 
   static async getUser(userName: string, proj?: object): Promise<any> {
     UserFacade.isDbReady();
-    const user = await userCollection.findOne({ userName });
+    const user: IUser | null = await userCollection.findOne({ userName });
     return user;
   }
 
