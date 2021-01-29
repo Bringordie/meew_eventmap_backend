@@ -31,10 +31,11 @@ router.post("/join/events", async function (req, res, next) {
 
   try {
     const dateAndTime = req.body.date_time;
-    const day = Number(dateAndTime.substr(0, 2));
+    const day = Number(dateAndTime.substr(8, 2));
+    const eventID = req.body.eventID;
     //-1 as month start at 0
-    const month = Number(dateAndTime.substr(3, 2)) - 1;
-    const year = Number(dateAndTime.substr(6, 4));
+    const month = Number(dateAndTime.substr(5, 2)) - 1;
+    const year = Number(dateAndTime.substr(0, 4));
     const hour = Number(dateAndTime.substr(11, 2));
     const minute = Number(dateAndTime.substr(14, 2));
     const dateObject = new Date(year, month, day, hour, minute);
@@ -45,13 +46,18 @@ router.post("/join/events", async function (req, res, next) {
       houseNumber: req.body.house_number,
       postcode: req.body.postcode,
       eventName:  req.body.event_name,
-      ticketAmount: req.body.ticket_amount,
+      ticketAmountBought: req.body.ticket_amount,
       ticketPrice: req.body.ticket_price,
       eventSchedule: dateObject
-    
-    }
+    }  
+
+      const joinEvent = await userFacade.joinEvents(joinEventObj, eventID);
+
+    return res.json({joinEvent})
+
   } catch (err) {
-    console.log("Error", err)
+    JSON.stringify(err)
+    next(new ApiError(err.message, 400))
     }
 });
 

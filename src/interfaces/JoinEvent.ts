@@ -5,7 +5,7 @@ export default interface IJoinEvent {
   houseNumber: string;
   postcode: number;
   eventName: string;
-  ticketAmount: number;
+  ticketAmountBought: number;
   ticketPrice: number;
   eventSchedule: Date;
 }

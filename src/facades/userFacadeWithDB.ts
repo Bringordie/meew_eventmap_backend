@@ -44,28 +44,28 @@ export default class UserFacade {
     return user;
   }
 
-  // static async joinEvents(joinEvent: IJoinEvent, eventID: any) {
-  //   const event = eventCollection.findOne({
-  //     _id: eventID
-  //   })
-  //   const updateEvent = eventCollection.findOneAndUpdate({
-  //     event, 
-  //     ticketAmount: ticketAmount-joinEvent.ticketAmount;
-  //   })
-  // };
 
-  static async joinEvents(joinEvent: IJoinEvent, eventID: any) : Promise<any> {
-    const event: IEvent | null = await eventCollection.findOne({
-      _id: eventID
-    });
-    const updateEvent = eventCollection.findOneAndUpdate({ _id: eventID }, 
-      { $set: { ticketAmount: event?.ticketAmount?? - joinEvent.ticketAmount }}, 
-      { upsert: true }, 
-      function(err) {
-      if (err) { throw err; }
-      else { console.log("Updated"); }
-    }); 
-  };
+
+  static async joinEvents(joinEvent: IJoinEvent, eventID: any): Promise<any> {
+    UserFacade.isDbReady();
+
+    try {
+      const event: IEvent | any = await eventCollection.findOne({
+        _id: new mongo.ObjectID(eventID),
+      });
+
+      const updateTicket = event.ticketAmount - joinEvent.ticketAmountBought;
+      if(updateTicket < 0){
+        return "Tickets out of stock"
+      }
+      const updateEvent = await eventCollection.updateOne(event, {
+        $set: { ticketAmount: updateTicket },
+      });
+      return "Event Updated!"
+    } catch (e) {
+      return "Error: " + e.message
+    }
+  }
   
   static async checkUser(userName: string, password: string): Promise<boolean> {
     UserFacade.isDbReady();
@@ -73,7 +73,7 @@ export default class UserFacade {
     let user;
     user = await UserFacade.getUser(userName);
     if (user == null) {
-      return Promise.reject(false);
+      return false;
     }
     userPassword = user.password;
     const status = await bryptCheckAsync(password, userPassword);
