@@ -4,6 +4,7 @@ const debug = require("debug")("user-endpoint");
 const router = express.Router();
 import { ApiError } from "../errors/apiError";
 import app from "../app";
+import IJoinEvent from "../interfaces/JoinEvent";
 
 let facadeInitialized = false;
 router.use(async (req, res, next) => {
@@ -24,6 +25,40 @@ router.post("/", async function (req, res, next) {
     JSON.stringify(err);
     next(new ApiError(err.message, 400));
   }
+});
+
+router.post("/join/events", async function (req, res, next) {
+
+  try {
+    const dateAndTime = req.body.date_time;
+    const day = Number(dateAndTime.substr(8, 2));
+    const eventID = req.body.eventID;
+    //-1 as month start at 0
+    const month = Number(dateAndTime.substr(5, 2)) - 1;
+    const year = Number(dateAndTime.substr(0, 4));
+    const hour = Number(dateAndTime.substr(11, 2));
+    const minute = Number(dateAndTime.substr(14, 2));
+    const dateObject = new Date(year, month, day, hour, minute);
+
+    const joinEventObj: IJoinEvent = {
+      username: req.body.user,
+      road: req.body.road,
+      houseNumber: req.body.house_number,
+      postcode: req.body.postcode,
+      eventName:  req.body.event_name,
+      ticketAmountBought: req.body.ticket_amount,
+      ticketPrice: req.body.ticket_price,
+      eventSchedule: dateObject
+    }  
+
+      const joinEvent = await userFacade.joinEvents(joinEventObj, eventID);
+
+    return res.json({joinEvent})
+
+  } catch (err) {
+    JSON.stringify(err)
+    next(new ApiError(err.message, 400))
+    }
 });
 
 module.exports = router;
